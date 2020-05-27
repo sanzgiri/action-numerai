@@ -12,9 +12,8 @@ def predict():
     # download dataset from numerai
     data = nx.download('numerai_dataset.zip', load=False)
     print('data downloaded')
-    data = nx.load_zip('numerai_dataset.zip')
+    data = nx.load_zip('numerai_dataset.zip', single_precision=True)
     print('data loaded')
-    return
 
     for tournament_name in tournaments:
         saved_model_name = 'model_trained_' + tournament_name
