@@ -10,8 +10,10 @@ def predict():
 
 
     # download dataset from numerai
-    # data = nx.download('numerai_dataset.zip')
-
+    data = nx.download('numerai_dataset.zip', load=False)
+    print('data downloaded')
+    data = nx.load_zip('numerai_dataset.zip')
+    print('data loaded')
     return
 
     for tournament_name in tournaments:
