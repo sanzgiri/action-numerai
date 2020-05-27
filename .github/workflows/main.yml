@@ -32,11 +32,6 @@ jobs:
         sudo apt-get update -y
         pip3 install numerox>=4.1.6
 
-    - name: train model
-      id: train_model
-      run: |
-        python3 ./train.py
-
     - name: submit predictions
       run: |
-        python3 ./predict.py
+        python3 predict.py
