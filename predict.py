@@ -10,7 +10,7 @@ def predict():
 
 
     # download dataset from numerai
-    data = nx.download('numerai_dataset.zip')
+    # data = nx.download('numerai_dataset.zip')
 
     return
 
