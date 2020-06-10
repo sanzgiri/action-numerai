@@ -1,11 +1,7 @@
 name: submit predictions
 on:
-  #schedule:
-  #  - cron:  '*/15 * * * *'
   push:
-  #  branches-ignore:
-  #    - '**'
-
+  
 jobs:
   submit_predictions:
     if: github.event_name == 'push'
