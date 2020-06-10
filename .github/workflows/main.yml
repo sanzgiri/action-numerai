@@ -8,7 +8,7 @@ on:
 
 jobs:
   submit_predictions:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'push'
     runs-on: self-hosted
     steps:
 
