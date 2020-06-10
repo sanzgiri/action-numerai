@@ -17,6 +17,7 @@ jobs:
         title: ${{ github.event.issue.title }}
         actor: ${{ github.actor }}
         event_name: ${{ github.event_name }}
+        LD_LIBRARY_PATH: /home/runner/actions-runner/_work/_tool/Python/3.8.3/x64/lib
 
     - name: Copy Repository Contents
       uses: actions/checkout@v2
