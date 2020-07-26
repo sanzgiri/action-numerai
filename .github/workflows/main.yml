@@ -28,7 +28,6 @@ jobs:
 
     - name: install dependencies
       run: |
-        sudo apt-get update -y
         pip3 install numerox>=4.1.6
 
     - name: submit predictions
