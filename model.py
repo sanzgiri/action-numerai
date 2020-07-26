@@ -4,7 +4,7 @@ import joblib
 from sklearn.linear_model import LinearRegression
 
 # You can find your model_id at https://numer.ai/models
-model_id = '12839fd8-06ab-4a99-b97f-ec73162fa959'
+model_id = os.environ["MODEL_ID"]
 
 # define a model that can be trained separately and saved
 class LinearModel(nx.Model):
