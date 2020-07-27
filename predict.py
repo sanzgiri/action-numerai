@@ -50,7 +50,7 @@ def predict():
 
         api = NumerAPI(public_id=public_id, secret_key=secret_key)
         model_id = api.get_models()
-        api.upload_predictions(prediction_filename, model_id=model_id['akrimedes_2']
+        api.upload_predictions(prediction_filename, model_id=model_id['akrimedes_2'])
         
         #submission_id = nx.upload(
         #    prediction_filename,
