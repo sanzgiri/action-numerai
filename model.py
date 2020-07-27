@@ -13,7 +13,7 @@ class LinearModel(nx.Model):
     def __init__(self, verbose=False):
         self.verbose = verbose
         self.model = LinearRegression()
-        self.model_id = model_id
+        #self.model_id = model_id
 
     def fit(self, dfit, tournament):
         self.model.fit(dfit.x, dfit.y[tournament])
