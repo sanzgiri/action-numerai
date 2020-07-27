@@ -1,11 +1,11 @@
 name: submit predictions
 on:
   schedule:
-    - cron:  '25 0 * * *'
+    - cron:  '30 0 * * *'
   
 jobs:
   submit_predictions:
-    if: github.event_name == 'push'
+    if: github.event_name == 'schedule'
     runs-on: self-hosted
     steps:
 
