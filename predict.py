@@ -2,6 +2,8 @@ import numerox as nx
 import numerapi
 import os
 import model
+from numerapi import *
+
 
 def predict():
 
@@ -46,14 +48,18 @@ def predict():
     for tournament_name in tournaments:
         prediction_filename = '/tmp/prediction_' + tournament_name + '.csv'
 
-        submission_id = nx.upload(
-            prediction_filename,
-            tournament_name,
-            public_id,
-            secret_key,
-            block=False,
-            n_tries=3,
-            model_id=model.model_id)
+        api = NumerAPI(public_id=public_id, secret_key=secret_key)
+        model_id = api.get_models()
+        api.upload_predictions(prediction_filename, model_id=model_id['akrimedes_2']
+        
+        #submission_id = nx.upload(
+        #    prediction_filename,
+        #    tournament_name,
+        #    public_id,
+        #    secret_key,
+        #    block=False,
+        #    n_tries=3,
+        #    model_id=model.model_id)
 
     # staking variables
     # change block in nx.upload to block=True. This is because you can't stake until the submission has finished its checks, which take a few minutes
