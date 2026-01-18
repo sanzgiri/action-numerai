@@ -42,6 +42,13 @@ def predict():
         napi.download_dataset("v5.2/train.parquet")
         train_data = pd.read_parquet("v5.2/train.parquet")
 
+        # Optional: Limit training rows to avoid timeout (set TRAIN_SAMPLE_SIZE env var)
+        train_sample_size = os.environ.get("TRAIN_SAMPLE_SIZE")
+        if train_sample_size:
+            sample_size = int(train_sample_size)
+            print(f"Using sample of {sample_size} rows for training (full dataset: {len(train_data)} rows)")
+            train_data = train_data.sample(n=min(sample_size, len(train_data)), random_state=42)
+
         # Train model
         model = NumeraiModel(verbose=True)
         model.fit(train_data)
