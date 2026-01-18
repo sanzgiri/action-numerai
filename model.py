@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from sklearn.linear_model import LinearRegression
+from sklearn.impute import SimpleImputer
 
 
 class NumeraiModel:
@@ -13,6 +14,7 @@ class NumeraiModel:
     def __init__(self, verbose=False):
         self.verbose = verbose
         self.model = LinearRegression()
+        self.imputer = SimpleImputer(strategy='median')
         self.feature_cols = None
         self.target_col = "target"
 
@@ -36,6 +38,9 @@ class NumeraiModel:
         X = train_data[self.feature_cols].values
         y = train_data[self.target_col].values
 
+        # Fit imputer and transform data to handle NaN values
+        X = self.imputer.fit_transform(X)
+
         # Train the model
         self.model.fit(X, y)
 
@@ -57,6 +62,9 @@ class NumeraiModel:
 
         # Prepare prediction data
         X = live_data[self.feature_cols].values
+
+        # Transform data with imputer to handle NaN values
+        X = self.imputer.transform(X)
 
         # Generate predictions
         predictions = self.model.predict(X)
