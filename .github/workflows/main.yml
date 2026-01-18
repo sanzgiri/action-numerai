@@ -7,6 +7,7 @@ on:
 jobs:
   submit_predictions:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
 
     - name: Copy Repository Contents
@@ -17,6 +18,14 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Cache trained model
+      uses: actions/cache@v4
+      with:
+        path: trained_model.joblib
+        key: numerai-model-v5.2-${{ hashFiles('model.py') }}
+        restore-keys: |
+          numerai-model-v5.2-
+
     - name: Install dependencies
       run: |
         pip install --upgrade pip
@@ -26,5 +35,6 @@ jobs:
       env:
         NUMERAI_PUBLIC_ID: ${{ secrets.NUMERAI_PUBLIC_ID }}
         NUMERAI_SECRET_KEY: ${{ secrets.NUMERAI_SECRET_KEY }}
+        TRAIN_SAMPLE_SIZE: 100000  # Limit training to 100k rows to avoid timeout
       run: |
         python predict.py
