@@ -23,12 +23,12 @@ def predict():
 
     # Download the current dataset
     print("Downloading dataset...")
-    napi.download_dataset("v4.3/live.parquet")
+    napi.download_dataset("v5.2/live.parquet")
     print("Dataset downloaded")
 
     # Load the live data
     print("Loading live data...")
-    live_data = pd.read_parquet("v4.3/live.parquet")
+    live_data = pd.read_parquet("v5.2/live.parquet")
     print(f"Live data shape: {live_data.shape}")
 
     # Initialize or load model
@@ -39,8 +39,8 @@ def predict():
     else:
         print("No saved model found. Training new model...")
         # Download training data
-        napi.download_dataset("v4.3/train.parquet")
-        train_data = pd.read_parquet("v4.3/train.parquet")
+        napi.download_dataset("v5.2/train.parquet")
+        train_data = pd.read_parquet("v5.2/train.parquet")
 
         # Train model
         model = NumeraiModel(verbose=True)
