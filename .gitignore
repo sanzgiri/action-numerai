@@ -1,1 +1,24 @@
 .idea
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Numerai specific
+*.parquet
+*.csv
+*.joblib
+trained_model*
+model_trained_*
+predictions_*
+numerai_dataset*
+v4.3/
+
+# Environment
+.env
+.venv
+venv/
