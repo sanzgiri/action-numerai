@@ -61,15 +61,13 @@ def predict():
     print("Generating predictions...")
     predictions = model.predict(live_data)
 
-    # Create submission dataframe
-    submission = pd.DataFrame({
-        "id": live_data["id"],
-        "prediction": predictions
-    })
+    # Create submission dataframe using index as id
+    # In v5.2, the id is in the dataframe index, not as a column
+    submission = pd.Series(predictions, index=live_data.index).to_frame("prediction")
 
-    # Save predictions to file
+    # Save predictions to file (index will be saved as id column)
     prediction_file = f"predictions_round_{current_round}.csv"
-    submission.to_csv(prediction_file, index=False)
+    submission.to_csv(prediction_file)
     print(f"Predictions saved to {prediction_file}")
 
     # Get model ID for submission
