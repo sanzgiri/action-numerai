@@ -2,35 +2,29 @@ name: submit predictions
 on:
   schedule:
     - cron:  '40 1 * * *'
-  
+  workflow_dispatch:  # Allow manual trigger
+
 jobs:
   submit_predictions:
-    if: github.event_name == 'schedule'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
 
-    - name: See event name
-      run: |
-        echo "title ${title}"
-        echo "actor ${actor}"
-        echo "event_name ${event_name}"
-      env:
-        title: ${{ github.event.issue.title }}
-        actor: ${{ github.actor }}
-        event_name: ${{ github.event_name }}
-
     - name: Copy Repository Contents
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.8.5 ## Version range or exact version of a Python version to use, using SemVer's version range syntax
+        python-version: '3.11'
 
-    - name: install dependencies
+    - name: Install dependencies
       run: |
-        pip3 install numerox>=4.1.6
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: submit predictions
+    - name: Submit predictions
+      env:
+        NUMERAI_PUBLIC_ID: ${{ secrets.NUMERAI_PUBLIC_ID }}
+        NUMERAI_SECRET_KEY: ${{ secrets.NUMERAI_SECRET_KEY }}
       run: |
-        python3 predict.py
+        python predict.py

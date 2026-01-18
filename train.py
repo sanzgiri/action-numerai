@@ -1,20 +1,39 @@
-import numerox as nx
-import numerapi
 import os
-import model
+import pandas as pd
+from numerapi import NumerAPI
+from model import NumeraiModel
 
-tournaments = nx.tournament_names()
-print(tournaments)
 
-# download dataset from numerai
-data = nx.download('numerai_dataset.zip')
+def train():
+    """
+    Download Numerai training data and train a model.
+    """
+    # Initialize Numerai API
+    public_id = os.environ.get("NUMERAI_PUBLIC_ID")
+    secret_key = os.environ.get("NUMERAI_SECRET_KEY")
 
-for tournament_name in tournaments:
-    # create your model
-    m = model.LinearModel(verbose=True)
+    napi = NumerAPI(public_id=public_id, secret_key=secret_key)
 
-    print("fitting model for", tournament_name)
-    m.fit(data['train'], tournament_name)
+    # Download training dataset
+    print("Downloading training dataset...")
+    napi.download_dataset("v4.3/train.parquet")
+    print("Dataset downloaded")
 
-    print("saving model for", tournament_name)
-    m.save('model_trained_' + tournament_name)
+    # Load training data
+    print("Loading training data...")
+    train_data = pd.read_parquet("v4.3/train.parquet")
+    print(f"Training data shape: {train_data.shape}")
+
+    # Create and train model
+    print("Training model...")
+    model = NumeraiModel(verbose=True)
+    model.fit(train_data)
+
+    # Save the trained model
+    model_path = "trained_model.joblib"
+    model.save(model_path)
+    print(f"Model saved to {model_path}")
+
+
+if __name__ == "__main__":
+    train()

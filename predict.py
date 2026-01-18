@@ -1,75 +1,85 @@
-import numerox as nx
-import numerapi
 import os
-import model
-from numerapi import *
+import pandas as pd
+from numerapi import NumerAPI
+from model import NumeraiModel
 
 
 def predict():
+    """
+    Download current Numerai dataset, generate predictions, and submit them.
+    """
+    # Initialize Numerai API
+    public_id = os.environ.get("NUMERAI_PUBLIC_ID")
+    secret_key = os.environ.get("NUMERAI_SECRET_KEY")
 
-    tournaments = nx.tournament_names()
-    print(tournaments)
+    if not public_id or not secret_key:
+        raise ValueError("NUMERAI_PUBLIC_ID and NUMERAI_SECRET_KEY must be set as environment variables")
 
+    napi = NumerAPI(public_id=public_id, secret_key=secret_key)
 
-    # download dataset from numerai
-    data = nx.download('numerai_dataset.zip', load=False)
-    print('data downloaded')
-    data = nx.load_zip('numerai_dataset.zip', single_precision=True)
-    print('data loaded')
+    # Get current round information
+    current_round = napi.get_current_round()
+    print(f"Current round: {current_round}")
 
-    for tournament_name in tournaments:
-        saved_model_name = 'model_trained_' + tournament_name
-        if os.path.exists(saved_model_name):
-            print("using saved model for", tournament_name)
-            m = model.LinearModel.load(saved_model_name)
-        else:
-            print("saved model not found for", tournament_name)
-            m = model.LinearModel(verbose=True)
+    # Download the current dataset
+    print("Downloading dataset...")
+    napi.download_dataset("v4.3/live.parquet")
+    print("Dataset downloaded")
 
-            print("training model for", tournament_name)
-            m.fit(data['train'], tournament_name)
+    # Load the live data
+    print("Loading live data...")
+    live_data = pd.read_parquet("v4.3/live.parquet")
+    print(f"Live data shape: {live_data.shape}")
 
-        print("running predictions for", tournament_name, flush=True)
-        # fit model with train data and make predictions for tournament data
-        prediction = nx.production(m, data, tournament=tournament_name)
+    # Initialize or load model
+    model_path = "trained_model.joblib"
+    if os.path.exists(model_path):
+        print(f"Loading saved model from {model_path}")
+        model = NumeraiModel.load(model_path)
+    else:
+        print("No saved model found. Training new model...")
+        # Download training data
+        napi.download_dataset("v4.3/train.parquet")
+        train_data = pd.read_parquet("v4.3/train.parquet")
 
-        # save predictions to csv file
-        prediction_filename = '/tmp/prediction_' + tournament_name + '.csv'
-        prediction.to_csv(prediction_filename, verbose=True)
+        # Train model
+        model = NumeraiModel(verbose=True)
+        model.fit(train_data)
 
-    # submit the prediction
+        # Save model for future use
+        model.save(model_path)
+        print(f"Model saved to {model_path}")
 
-    # Numerai API key
-    # You will need to create an API key by going to https://numer.ai/account and clicking "Add" under the "Your API keys" section.
-    # Select the following permissions for the key: "Upload submissions", "Make stakes", "View historical submission info", "View user info"
-    public_id = os.environ["NUMERAI_PUBLIC_ID"]
-    secret_key = os.environ["NUMERAI_SECRET_KEY"]
+    # Generate predictions
+    print("Generating predictions...")
+    predictions = model.predict(live_data)
 
-    for tournament_name in tournaments:
-        prediction_filename = '/tmp/prediction_' + tournament_name + '.csv'
+    # Create submission dataframe
+    submission = pd.DataFrame({
+        "id": live_data["id"],
+        "prediction": predictions
+    })
 
-        api = NumerAPI(public_id=public_id, secret_key=secret_key)
-        model_id = api.get_models()
-        api.upload_predictions(prediction_filename, model_id=model_id['akrimedes_2'])
-        
-        #submission_id = nx.upload(
-        #    prediction_filename,
-        #    tournament_name,
-        #    public_id,
-        #    secret_key,
-        #    block=False,
-        #    n_tries=3,
-        #    model_id=model.model_id)
+    # Save predictions to file
+    prediction_file = f"predictions_round_{current_round}.csv"
+    submission.to_csv(prediction_file, index=False)
+    print(f"Predictions saved to {prediction_file}")
 
-    # staking variables
-    # change block in nx.upload to block=True. This is because you can't stake until the submission has finished its checks, which take a few minutes
-    # confidence = .501 # increase this number to signify your confidence in a minimum AUC. Can't go below .501
-    # stake_value = .1 # the amount of NMR to stake
+    # Get model ID for submission
+    models = napi.get_models()
+    print(f"Available models: {models}")
 
-    # napi = numerapi.NumerAPI(public_id, secret_key)
+    # Submit predictions for the first model (you may want to customize this)
+    if models:
+        model_id = list(models.keys())[0]
+        print(f"Submitting predictions for model: {model_id}")
 
-    # for tournament_name in tournaments:
-    #   napi.stake(confidence, stake_value, nx.tournament_int(tournament_name))
+        submission_id = napi.upload_predictions(prediction_file, model_id=model_id)
+        print(f"Submission successful! Submission ID: {submission_id}")
+    else:
+        print("No models found. Please create a model at https://numer.ai/models")
+        print(f"Predictions saved to {prediction_file} for manual upload")
+
 
 if __name__ == "__main__":
     predict()
